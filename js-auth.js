@@ -43,11 +43,22 @@ async function handleLogin(e) {
         
         showLoading(submitBtn);
         
-        // Call Google Apps Script login function
-        google.script.run
-            .withSuccessHandler(onLoginSuccess)
-            .withFailureHandler(onLoginError)
-            .login(username, password);
+// กำหนด URL ของ API ที่ได้จากการ Deploy Google Apps Script (Web App)
+const API_URL = "https://script.google.com/macros/s/AKfycbxUZvL81zZ9nBEuSQivYY1KRPZGRBQ-SA6ZUQNnGEt4upPOspPPknxevNEKUADAAG_5_g/exec"; 
+
+// ใช้ fetch แทน google.script.run
+fetch(API_URL + "?action=login", {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+})
+.then(response => response.json())
+.then(data => {
+    onLoginSuccess(data); // เรียกฟังก์ชันเดิมต่อเมื่อสำเร็จ
+})
+.catch(error => {
+    onLoginError(error); // เรียกฟังก์ชันเดิมเมื่อมีปัญหา
+});
             
     } catch (error) {
         console.error('Login error:', error);
